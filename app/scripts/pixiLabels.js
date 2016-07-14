@@ -95,7 +95,7 @@ let zoom = d3.behavior.zoom()
     .on('zoom', draw)
 
 gMain.call(zoom);
-let lineWidth = 10;
+let lineWidth = 1;
 
 let graphics = new PIXI.Graphics();
 function draw() {
@@ -109,7 +109,7 @@ document.body.appendChild( stats.dom );
 graphics = new PIXI.Graphics();
 graphics.lineStyle(lineWidth, 0x0000FF,1);
 
-let numPoints = 20000;
+let numPoints = 8000;
 
 for (let i = 0; i < numPoints; i ++) {
     graphics.moveTo(randX(), randY());

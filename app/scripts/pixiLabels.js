@@ -37,13 +37,6 @@ var stage = new PIXI.Container();
 var pMain = new PIXI.Graphics();
 stage.addChild(pMain);
 
-function animate() {
-    requestAnimationFrame(animate);
-
-    // render the container
-    renderer.render(stage);
-}
-animate();
 
 var text = new PIXI.Text("Pixi.js has text!", {font:"15px Arial", fill:"red"});
 pMain.addChild(text);
@@ -61,11 +54,22 @@ let maxX = width, maxY = height;
 //let maxX =10, maxY = 60;
 let format = d3.format(".2n")
 
-let points = d3.range(0,500).map((d) => { 
+function randX() {
+    return minX + (maxX - minX) * Math.random();
+}
+
+function randY() {
+    return minY + (maxY - minY) * Math.random();
+}
+
+let points = d3.range(0,1000).map((d) => { 
     let dotSize = 10 * Math.random();
 
-    return {'x': minX + (maxX - minX) * Math.random(),
-            'y': minY + (maxY - minY) * Math.random(),
+    return {
+            'x1': minX + (maxX - minX) * Math.random(),
+            'y1': minY + (maxY - minY) * Math.random(),
+            'x2': minX + (maxX - minX) * Math.random(),
+            'y2': minY + (maxY - minY) * Math.random(),
             'r': dotSize,
             'label': format(dotSize),
             'name': d.toString()}});
@@ -91,41 +95,55 @@ let zoom = d3.behavior.zoom()
     .on('zoom', draw)
 
 gMain.call(zoom);
+let lineWidth = 10;
 
+let graphics = new PIXI.Graphics();
 function draw() {
-    pMain.position.x = zoom.translate()[0];
-    pMain.position.y = zoom.translate()[1];
-    pMain.scale.x = zoom.scale();
-    pMain.scale.y = zoom.scale();
 
-    let boxes = [];
+}
 
-    for (let i = 0; i < texts.length; i++) {
-        texts[i].scale.x = 1 / zoom.scale();
-        texts[i].scale.y = 1 / zoom.scale();
+var stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.dom );
 
-        //texts[i].visible = true;
-        texts[i].alpha = 1;
+graphics = new PIXI.Graphics();
+graphics.lineStyle(lineWidth, 0x0000FF,1);
 
-        let box = texts[i].getBounds();
-        boxes.push([box.x, box.y, box.x + box.width, box.y + box.height]);
+let numPoints = 20000;
+
+for (let i = 0; i < numPoints; i ++) {
+    graphics.moveTo(randX(), randY());
+    graphics.lineTo(randX(), randY());
+
+};
+pMain.addChild(graphics);
+
+function animate() {
+    stats.begin()
+
+    pMain.removeChild(graphics);
+    graphics = new PIXI.Graphics();
+
+    graphics.lineStyle(lineWidth, 0x0000FF,1);
+    //graphics.moveTo(0, 0);
+    //graphics.lineStyle(1, 0x0000FF);
+    //graphics.beginFill(0xFF700B, 1);
+    let j = 0;
+    for (let i = 0; i < numPoints; i ++) {
+        graphics.moveTo(randX(), randY());
+        graphics.lineTo(randX(), randY());
 
     };
 
-    //console.log('boxes[0]', boxes[0], boxes[1]);
+    pMain.addChild(graphics);
 
-    var result = boxIntersect(boxes, function(i,j) {
-            if (points[i].r > points[j].r)
-                texts[j].alpha = 0;
-            else
-                texts[i].alpha = 0;
-    })
+    // render the container
+    renderer.render(stage);
 
-    //console.log('boxes:', boxes);
-    //console.log('text', text.getBounds());
+    stats.end();
+    requestAnimationFrame(animate);
 }
+animate();
 
 draw();
-
-
 }
